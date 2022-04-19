@@ -1,41 +1,69 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
+import * as Yup from "yup";
 import { FiXCircle } from "react-icons/fi";
 
-import { TextArea } from "../forms";
 import { Icon } from "../";
+import { AppForm, AppFormArea, SubmitButton } from "../forms/formik";
+
+const validationSchema = Yup.object().shape({
+  description: Yup.string()
+    .min(10, "This should be atleast 10 characters long.")
+    .max(400, "This should not exceed 400 characters.")
+    .required("This field is required."),
+});
 
 export default function AboutDescriptionEdit({ onClose }) {
-  const [description, setDescription] = useState(
-    "KabootekPH INC, a tech company that was established on year 2019. Kabootek is one of the fastest growing company that specializes in mobile and web applications."
-  );
+  const description =
+    "KabootekPH INC, a tech company that was established on year 2019. Kabootek is one of the fastest growing company that specializes in mobile and web applications.";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (values) => {
+    console.log(values);
   };
   return (
-    <FormWrapper onSubmit={handleSubmit}>
+    <FormWrapper>
       <IconWrapper onClick={onClose}>
         <Icon icon={FiXCircle} size={40} color="#F61767" />
       </IconWrapper>
-      <FieldWrapper>
-        <FormTitle>Description</FormTitle>
-        <TextArea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </FieldWrapper>
-      <Button>Save</Button>
+      <AppForm
+        initialValues={{ description }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        <FieldWrapper>
+          <FormTitle>Description</FormTitle>
+          <AppFormArea name="description" placeholder="Description..." />
+        </FieldWrapper>
+        <SubmitButton className="save-btn">Save</SubmitButton>
+      </AppForm>
     </FormWrapper>
   );
 }
 
-const FormWrapper = styled.form`
+const FormWrapper = styled.div`
   width: 500px;
   border-radius: 3rem;
   background-color: #ffffff;
   overflow: hidden;
   color: ${({ theme }) => theme.dark};
+
+  & .save-btn {
+    width: 100%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 2rem 4rem;
+    transition: all 300ms ease;
+    color: ${({ theme }) => theme.light};
+    background-color: ${({ theme }) => theme.accent};
+
+    &:hover {
+      background-color: ${({ theme }) => theme.active};
+    }
+  }
 `;
 
 const IconWrapper = styled.div`
@@ -51,21 +79,4 @@ const FieldWrapper = styled.div`
 const FormTitle = styled.h1`
   font-size: 3.6rem;
   text-align: center;
-`;
-
-const Button = styled.button`
-  width: 100%;
-  outline: none;
-  border: none;
-  padding: 2rem 4rem;
-  cursor: pointer;
-  transition: all 300ms ease;
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: ${({ theme }) => theme.light};
-  background-color: ${({ theme }) => theme.accent};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.active};
-  }
 `;

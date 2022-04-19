@@ -1,30 +1,46 @@
 import React from "react";
 import styled from "styled-components";
-import { ImagePicker } from "../forms";
 import { FiXCircle } from "react-icons/fi";
+import * as Yup from "yup";
 
-import { Icon } from "../";
+import { Icon, HeroImageSelection } from "../";
+import { heroImages } from "../../utils/data";
+import { AppForm, SubmitButton } from "../forms/formik";
+
+const validationSchema = Yup.object().shape({
+  image: Yup.string().required("Please select an image"),
+});
 
 export default function HomeImageEdit({ onClose }) {
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (values) => {
+    console.log(values);
   };
   return (
     <FormWrapper onSubmit={handleSubmit}>
       <IconWrapper onClick={onClose}>
         <Icon icon={FiXCircle} size={40} color="#F61767" />
       </IconWrapper>
-      <FieldWrapper>
-        <FormTitle>Image</FormTitle>
-        <ImagePicker />
-      </FieldWrapper>
-      <Button>Save</Button>
+
+      <AppForm
+        initialValues={{ image: "" }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        <FieldWrapper>
+          <FormTitle>Image</FormTitle>
+          <HeroImageSelection name="image" data={heroImages} />
+        </FieldWrapper>
+
+        <ButtonWrapper>
+          <SubmitButton className="save-btn">Apply</SubmitButton>
+        </ButtonWrapper>
+      </AppForm>
     </FormWrapper>
   );
 }
 
-const FormWrapper = styled.form`
-  width: 500px;
+const FormWrapper = styled.div`
+  width: 1220px;
   border-radius: 3rem;
   background-color: #ffffff;
   color: ${({ theme }) => theme.dark};
@@ -38,28 +54,17 @@ const IconWrapper = styled.div`
 `;
 
 const FieldWrapper = styled.div`
-  padding: 1rem 5rem;
-  text-align: center;
+  padding: 2rem 5rem;
 `;
 
 const FormTitle = styled.h1`
-  font-size: 3.6rem;
-  text-align: center;
+  font-size: 2rem;
+  font-weight: 400;
+  margin-bottom: 3rem;
 `;
 
-const Button = styled.button`
-  width: 100%;
-  outline: none;
-  border: none;
-  padding: 2rem 4rem;
-  cursor: pointer;
-  transition: all 300ms ease;
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: ${({ theme }) => theme.light};
-  background-color: ${({ theme }) => theme.accent};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.active};
-  }
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 5rem;
 `;

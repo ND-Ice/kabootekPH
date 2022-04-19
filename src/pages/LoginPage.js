@@ -1,16 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { FaArrowCircleLeft } from "react-icons/fa";
 
-import { CheckBox, Password, TextInput } from "../components/forms";
-import { Button } from "../components";
+import {
+  AppForm,
+  AppFormInput,
+  AppFormPassword,
+  SubmitButton,
+} from "../components/forms/formik";
+import { CheckBox } from "../components/forms";
 import hero_image from "../images/login_hero.png";
+
+const validationSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(8, "This field should be atleast 8 characters long.")
+    .required("This field is required."),
+  password: Yup.string()
+    .min(8, "This field should be atleast 8 characters long.")
+    .required("This field is required."),
+});
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [peeking, setPeeking] = useState(false);
 
-  const handleSubmit = () => navigate("/dashboard");
+  const handleSubmit = async (values) => {
+    console.log(values);
+    navigate("/dashboard");
+  };
 
   return (
     <Container data-aos="zoom-in" data-aos-duration="1000">
@@ -23,13 +42,34 @@ export default function LoginPage() {
             />
             <Title>Login</Title>
           </HeaderContainer>
-          <TextInput placeholder="Username" id="username" title="Username" />
-          <Password placeholder="Password" id="password" title="Password" />
+          <AppForm
+            initialValues={{ username: "", password: "" }}
+            onSubmit={handleSubmit}
+            validationSchema={validationSchema}
+          >
+            <AppFormInput
+              placeholder="Username"
+              name="username"
+              id="username"
+              title="Username"
+            />
+            <AppFormPassword
+              name="password"
+              placeholder="Password"
+              id="password"
+              title="Password"
+              isPeeking={peeking}
+            />
 
-          <FlexContainer>
-            <CheckBox title="Password" id="showPassword" />
-            <Button onClick={handleSubmit}>Sign</Button>
-          </FlexContainer>
+            <FlexContainer>
+              <CheckBox
+                title="Password"
+                id="showPassword"
+                onChange={() => setPeeking(!peeking)}
+              />
+              <SubmitButton>Sign</SubmitButton>
+            </FlexContainer>
+          </AppForm>
         </FormContainer>
         <HeroContainer>
           <LoginHero src={hero_image} />
@@ -65,7 +105,7 @@ const FormContainer = styled.div`
   padding: 1rem;
 
   @media (min-width: 800px) {
-    padding: 10rem 5rem;
+    padding: 5rem;
   }
 
   & .back-icon {

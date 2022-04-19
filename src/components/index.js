@@ -10,3 +10,6 @@ export { default as Icon } from "./Icon";
 export { default as ContactInformation } from "./ContactInformation";
 export { default as ColorPreset } from "./ColorPreset";
 export { default as Modal } from "./Modal";
+export { default as ColorPicker } from "./ColorPicker";
+export { default as ImageSelection } from "./ImageSelection";
+export { default as HeroImageSelection } from "./HeroImageSelection";

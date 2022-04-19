@@ -1,9 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function Icon({ icon: Icon, size = 30, color = "#00BFA6" }) {
+export default function Icon({
+  icon: Icon,
+  size = 30,
+  color = "#00BFA6",
+  ...otherProps
+}) {
   return (
-    <Component size={size} color={color}>
+    <Component size={size} color={color} {...otherProps}>
       <Icon className="component__icon" />
     </Component>
   );

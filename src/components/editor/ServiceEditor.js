@@ -4,17 +4,23 @@ import { FaTrashAlt, FaPencilAlt } from "react-icons/fa";
 
 import { Icon } from "../";
 
-export default function ServiceEditor({ img, title, description }) {
+export default function ServiceEditor({
+  img,
+  title,
+  description,
+  onEdit,
+  onDelete,
+}) {
   return (
     <Wrapper>
       <IconWrapper>
-        <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
+        <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} onClick={onEdit} />
       </IconWrapper>
       <ServiceImage src={img} alt="service-icon" />
       <Title>{title}</Title>
       <Description>{description}</Description>
       <EditWrapper>
-        <Icon icon={FaTrashAlt} color="#4b4b4b" size={20} />
+        <Icon icon={FaTrashAlt} color="#4b4b4b" size={20} onClick={onDelete} />
       </EditWrapper>
     </Wrapper>
   );

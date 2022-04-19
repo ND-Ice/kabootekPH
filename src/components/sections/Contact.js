@@ -5,6 +5,10 @@ import { Button } from "..";
 import { TextInput, TextArea } from "../forms";
 
 export default function Contact() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <Container id="contact">
       <Curve
@@ -40,7 +44,7 @@ export default function Contact() {
             </InfoDescription>
           </div>
         </InfoWrapper>
-        <FormWrapper data-aos="fade-left">
+        <FormWrapper onSubmit={handleSubmit} data-aos="fade-left">
           <TextInput type="text" placeholder="Fullname" />
           <TextInput type="email" placeholder="Email" />
           <TextArea name="message" id="message" placeholder="Hi there!" />

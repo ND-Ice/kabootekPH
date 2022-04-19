@@ -1,36 +1,67 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
+import * as Yup from "yup";
 import { FiXCircle } from "react-icons/fi";
 
-import { TextArea } from "../forms";
 import { Icon } from "../";
+import { AppForm, AppFormArea, SubmitButton } from "../forms/formik";
+
+const validationSchema = Yup.object().shape({
+  title: Yup.string()
+    .min(5, "This should be atleast 5 characters long.")
+    .required("This field required."),
+});
 
 export default function HomeTitleEdit({ onClose }) {
-  const [title, setTitle] = useState("eWallet Drive Company");
+  const title = "eWallet Drive Company";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (values) => {
+    console.log(values);
   };
   return (
-    <FormWrapper onSubmit={handleSubmit}>
+    <FormWrapper>
       <IconWrapper onClick={onClose}>
         <Icon icon={FiXCircle} size={40} color="#F61767" />
       </IconWrapper>
-      <FieldWrapper>
-        <FormTitle>Title</FormTitle>
-        <TextArea value={title} onChange={(e) => setTitle(e.target.value)} />
-      </FieldWrapper>
-      <Button>Save</Button>
+      <AppForm
+        initialValues={{ title }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        <FieldWrapper>
+          <FormTitle>Title</FormTitle>
+          <AppFormArea name="title" placeholder="Title" />
+        </FieldWrapper>
+        <SubmitButton className="save-btn">Save</SubmitButton>
+      </AppForm>
     </FormWrapper>
   );
 }
 
-const FormWrapper = styled.form`
+const FormWrapper = styled.div`
   width: 500px;
   border-radius: 3rem;
   background-color: #ffffff;
   overflow: hidden;
   color: ${({ theme }) => theme.dark};
+
+  & .save-btn {
+    width: 100%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 2rem 4rem;
+    transition: all 300ms ease;
+    color: ${({ theme }) => theme.light};
+    background-color: ${({ theme }) => theme.accent};
+
+    &:hover {
+      background-color: ${({ theme }) => theme.active};
+    }
+  }
 `;
 
 const IconWrapper = styled.div`
@@ -46,21 +77,4 @@ const FieldWrapper = styled.div`
 const FormTitle = styled.h1`
   font-size: 3.6rem;
   text-align: center;
-`;
-
-const Button = styled.button`
-  width: 100%;
-  outline: none;
-  border: none;
-  padding: 2rem 4rem;
-  cursor: pointer;
-  transition: all 300ms ease;
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: ${({ theme }) => theme.light};
-  background-color: ${({ theme }) => theme.accent};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.active};
-  }
 `;

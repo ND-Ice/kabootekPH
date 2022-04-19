@@ -35,14 +35,13 @@ const Component = styled.div`
   width: 250px;
   height: 100vh;
   display: flex;
-  padding: 2rem 0;
   flex-direction: column;
   justify-content: space-between;
   background: ${({ theme }) => theme.accent};
 `;
 
 const Header = styled.div`
-  padding: 2rem;
+  padding: 4rem 2rem;
   font-size: 1.6rem;
   font-weight: 500;
   display: flex;

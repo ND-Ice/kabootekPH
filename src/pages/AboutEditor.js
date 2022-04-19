@@ -5,11 +5,13 @@ import { FaPencilAlt } from "react-icons/fa";
 import { Icon, Modal } from "../components";
 
 import about_hero from "../images/about-hero.png";
-import { AboutDescriptionEdit } from "../components/modals";
+import { AboutDescriptionEdit, AboutImageEdit } from "../components/modals";
 
 export default function AboutEditor() {
   const [showAboutDescriptionEdit, setShowAboutDescriptionEdit] =
     useState(false);
+  const [showAboutImageEdit, setShowAboutImageEdit] = useState(false);
+
   return (
     <Page>
       <PageHeader>About</PageHeader>
@@ -17,7 +19,12 @@ export default function AboutEditor() {
         <div>
           <img src={about_hero} alt="" />
           <IconWrapper>
-            <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
+            <Icon
+              icon={FaPencilAlt}
+              color="#4b4b4b"
+              size={20}
+              onClick={() => setShowAboutImageEdit(true)}
+            />
           </IconWrapper>
         </div>
         <PageDescription>
@@ -37,6 +44,12 @@ export default function AboutEditor() {
         <AboutDescriptionEdit
           onClose={() => setShowAboutDescriptionEdit(false)}
         />
+      </Modal>
+      <Modal
+        isOpen={showAboutImageEdit}
+        onClose={() => setShowAboutImageEdit(false)}
+      >
+        <AboutImageEdit onClose={() => setShowAboutImageEdit(false)} />
       </Modal>
     </Page>
   );
