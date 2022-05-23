@@ -13,3 +13,4 @@ export { default as Modal } from "./Modal";
 export { default as ColorPicker } from "./ColorPicker";
 export { default as ImageSelection } from "./ImageSelection";
 export { default as HeroImageSelection } from "./HeroImageSelection";
+export { default as DescriptionEdit } from "./DescriptionEdit";

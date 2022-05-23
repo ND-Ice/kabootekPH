@@ -14,7 +14,7 @@ export default function Icon({
   );
 }
 
-const Component = styled.div`
+const Component = styled.span`
   display: inline-block;
 
   & .component__icon {

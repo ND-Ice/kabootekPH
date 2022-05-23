@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 
 // components import
@@ -6,23 +6,51 @@ import { Service } from "..";
 
 // utils import
 import { services } from "../../utils/data";
+import servicesApi from "../../api/services";
+import { ServicesContext } from "../../context/ServicesProvider";
 
 export default function Services() {
+  const { servicesData, setServicesData } = useContext(ServicesContext);
+
+  useEffect(() => {
+    getServicesData();
+  }, []);
+
+  const getServicesData = async () => {
+    try {
+      const response = await servicesApi.getServicesData();
+      setServicesData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container id="services">
       <PageHeader data-aos="fade-down" data-aos-duration="1000">
         Services
       </PageHeader>
       <CardContainer>
-        {services.map((service, index) => (
-          <Service
-            key={index}
-            index={index}
-            img={service.image}
-            title={service.title}
-            description={service.description}
-          />
-        ))}
+        {servicesData?.length !== 0
+          ? servicesData?.map((service, index) => (
+              <Service
+                key={index}
+                index={index}
+                img={service.image}
+                title={service.title}
+                description={service.description}
+              />
+            ))
+          : services?.map((service, index) => (
+              <Service
+                key={index}
+                index={index}
+                img={service.image}
+                image={service?.image}
+                title={service?.title}
+                description={service?.description}
+              />
+            ))}
       </CardContainer>
     </Container>
   );
@@ -42,7 +70,7 @@ const Container = styled("div")`
 const PageHeader = styled("h2")`
   font-size: 3.2rem;
   margin-bottom: 4rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   @media (min-width: 1240px) {
     margin-bottom: 10rem;

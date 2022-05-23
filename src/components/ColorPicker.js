@@ -23,7 +23,10 @@ export default function ColorPicker({ isOpen, onClose, name, onPick }) {
               height={228}
               color={color}
               hideHSV
-              onChange={setColor}
+              onChange={(color) => {
+                setColor(color);
+                setFieldValue(name, color.hex);
+              }}
               onChangeComplete={(color) => setFieldValue(name, color.hex)}
             />
             <Button onClick={onClose}>Okay</Button>
@@ -69,10 +72,10 @@ const Button = styled.button`
   transition: all 300ms ease;
   font-size: 1.6rem;
   font-weight: bold;
-  color: ${({ theme }) => theme.light};
-  background-color: ${({ theme }) => theme.accent};
+  color: ${({ theme }) => theme.light_color};
+  background-color: ${({ theme }) => theme.accent_color};
 
   &:hover {
-    background-color: ${({ theme }) => theme.active};
+    background-color: ${({ theme }) => theme.active_color};
   }
 `;

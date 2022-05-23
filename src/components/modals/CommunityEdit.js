@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { FiXCircle } from "react-icons/fi";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 
-import { Icon } from "../";
-import { AppForm, AppFormInput, SubmitButton } from "../forms/formik";
+import { Icon, Modal } from "../";
+import {
+  AppForm,
+  AppFormInput,
+  ErrorMessage,
+  SubmitButton,
+} from "../forms/formik";
+
+import { CommunityContext } from "../../context/CommunityProvier";
+import communityApi from "../../api/community";
 
 const validationSchema = Yup.object().shape({
   title: Yup.string()
@@ -13,28 +22,64 @@ const validationSchema = Yup.object().shape({
   href: Yup.string().required("This field si required."),
 });
 
-export default function CommunityEdit({ community, onClose }) {
-  const handleSubmit = (values) => {
-    console.log(values);
+export default function CommunityEdit({ selected, onClose, ...otherProps }) {
+  const { setCommunityLinks } = useContext(CommunityContext);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await communityApi.updateCommunityLinks(
+        values,
+        selected?.id
+      );
+      setCommunityLinks((prevState) =>
+        prevState.map((item) =>
+          item?.id === response?.data?.id
+            ? { ...item, ...response?.data }
+            : item
+        )
+      );
+      setLoading(false);
+      setErrorMessage(null);
+      toast.success("Updated Successfully.");
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage(error);
+      toast.error("An error occured.");
+    }
   };
   return (
-    <FormWrapper>
-      <IconWrapper onClick={onClose}>
-        <Icon icon={FiXCircle} size={40} color="#F61767" />
-      </IconWrapper>
-      <AppForm
-        initialValues={{ title: community.title, href: community.href }}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        <FieldWrapper>
-          <FormTitle>Support</FormTitle>
-          <AppFormInput name="title" placeholder="Title" />
-          <AppFormInput name="href" placeholder="Link Address" />
-        </FieldWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </FormWrapper>
+    <Modal onClose={onClose} {...otherProps}>
+      <FormWrapper>
+        <IconWrapper onClick={onClose}>
+          <Icon icon={FiXCircle} size={40} color="#F61767" />
+        </IconWrapper>
+        <AppForm
+          initialValues={{ title: selected?.title, href: selected?.href }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <FieldWrapper>
+            <FormTitle>Support</FormTitle>
+            <AppFormInput name="title" placeholder="Title" />
+            <AppFormInput name="href" placeholder="Link Address" />
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try again later."
+              }
+            />
+          </FieldWrapper>
+          <SubmitButton className="save-btn" disabled={loading}>
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </FormWrapper>
+    </Modal>
   );
 }
 
@@ -43,7 +88,7 @@ const FormWrapper = styled.div`
   border-radius: 3rem;
   background-color: #ffffff;
   overflow: hidden;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   & .save-btn {
     width: 100%;
@@ -55,11 +100,11 @@ const FormWrapper = styled.div`
     font-weight: bold;
     padding: 2rem 4rem;
     transition: all 300ms ease;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;

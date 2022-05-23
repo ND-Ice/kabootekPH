@@ -2,28 +2,29 @@ import React from "react";
 import styled from "styled-components";
 import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 
-import { Button, Icon, ColorPicker } from ".";
+import { Button, Icon } from ".";
 import { AppForm } from "./forms/formik";
+import ColorPIckerPlaceHolder from "./ColorPIckerPlaceHolder";
 
 export default function ColorPreset({ preset, onEdit, onDelete, onApply }) {
   return (
     <PresetWrapper>
-      <Indicator isActive={preset.isActive} />
+      <Indicator isActive={preset.is_activated} />
       <AppForm
         initialValues={{
-          dark: preset.colors.dark,
-          light: preset.colors.light,
-          accent: preset.colors.accent,
-          active: preset.colors.active,
+          dark_color: preset.dark_color,
+          light_color: preset.light_color,
+          accent_color: preset.accent_color,
+          active_color: preset.active_color,
         }}
       >
         <PickerWrapper>
-          <ColorPicker name="dark" />
-          <ColorPicker name="light" />
-          <ColorPicker name="accent" />
-          <ColorPicker name="active" />
+          <ColorPIckerPlaceHolder color={preset?.dark_color} />
+          <ColorPIckerPlaceHolder color={preset?.light_color} />
+          <ColorPIckerPlaceHolder color={preset?.accent_color} />
+          <ColorPIckerPlaceHolder color={preset?.active_color} />
         </PickerWrapper>
-        <ActionWrapper isActive={preset.isActive}>
+        <ActionWrapper isActive={preset.is_activated}>
           <Icon icon={FaPencilAlt} color="#4b4b4b" onClick={onEdit} />
           <Icon
             className="delete-btn"

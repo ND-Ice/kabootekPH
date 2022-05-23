@@ -7,8 +7,8 @@ export default function Button({ children, ...otherProps }) {
 
 const CustomButton = styled("button")`
   padding: 1.5rem 4rem;
-  background: #00bfa6;
-  color: ${({ theme }) => theme.light};
+  background: ${({ theme }) => theme.accent_color};
+  color: ${({ theme }) => theme.light_color};
   outline: none;
   cursor: pointer;
   font-size: 2rem;
@@ -19,8 +19,8 @@ const CustomButton = styled("button")`
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
   &:hover {
-    background: white;
-    border-color: ${({ theme }) => theme.accent};
-    color: ${({ theme }) => theme.accent};
+    background: none;
+    border-color: ${({ theme }) => theme.accent_color};
+    color: ${({ theme }) => theme.accent_color};
   }
 `;

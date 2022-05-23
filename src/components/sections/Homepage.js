@@ -1,10 +1,41 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
+
+import homeApi from "../../api/home";
+import themeApi from "../../api/theme";
+import { HomeContext } from "../../context/HomeProvider";
+import { CustomThemeContext } from "../../context/CustomThemeProvider";
 
 // image import
 import hero_image from "../../images/hero_image.png";
 
 export default function Homepage() {
+  const { homeData, setHomeData } = useContext(HomeContext);
+  const { setCustomTheme } = useContext(CustomThemeContext);
+
+  useEffect(() => {
+    getHomeData();
+    getThemes();
+  }, []);
+
+  const getHomeData = async () => {
+    try {
+      const response = await homeApi.getHomeData();
+      setHomeData(response.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getThemes = async () => {
+    try {
+      const response = await themeApi.getThemes();
+      setCustomTheme(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container id="home" data-aos="fade-down" data-aos-duration="1000">
       <Curve
@@ -15,18 +46,17 @@ export default function Homepage() {
       >
         <path
           d="M1022.94 510.861C1180.8 610.408 1536 666 1536 666V0H0V132.617C0 132.617 569.598 44.7297 798.274 286.772C878.19 371.36 924.104 448.537 1022.94 510.861Z"
-          fill="#00BFA6"
-          fill-opacity="0.1"
+          fill-opacity="0.05"
         />
       </Curve>
       <div>
-        <PageHeader>eWallet Driven Company</PageHeader>
+        <PageHeader>{homeData?.title || "eWallet Driven Company"}</PageHeader>
         <PageDescription>
-          eWallet is a money transfer service that allows you to send money to
-          anyone instantly, easily, and affordably.
+          {homeData?.description ||
+            "eWallet is a money transfer service that allows you to send money to anyone instantly, easily, and affordably."}
         </PageDescription>
       </div>
-      <HeroImage src={hero_image} alt="" />
+      <HeroImage src={homeData?.image || hero_image} alt="" />
     </Container>
   );
 }
@@ -60,7 +90,7 @@ const PageHeader = styled("h1")`
   margin: 0;
   margin-bottom: 3rem;
   margin-top: 5rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   @media (min-width: 1240px) {
     font-size: 8rem;
@@ -71,7 +101,7 @@ const PageDescription = styled("p")`
   font-size: 2rem;
   line-height: 3.6rem;
   margin: 0;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   @media (min-width: 1240px) {
     font-size: 2.4rem;
@@ -95,4 +125,5 @@ const Curve = styled("svg")`
   position: absolute;
   top: 0;
   left: 0;
+  fill: ${({ theme }) => theme.accent_color};
 `;

@@ -1,8 +1,8 @@
 const theme = {
-  dark: "#4B4B4B",
-  light: "#ffffff",
-  accent: "#00BFA6",
-  active: "#63C5B8",
+  dark_color: "#4B4B4B",
+  light_color: "#ffffff",
+  accent_color: "#00BFA6",
+  active_color: "#63C5B8",
 };
 
 export default theme;

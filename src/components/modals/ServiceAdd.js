@@ -1,11 +1,20 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { FiXCircle } from "react-icons/fi";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 
-import { Icon, ImageSelection } from "../";
-import { AppForm, AppFormArea, SubmitButton } from "../forms/formik";
+import { Icon, ImageSelection, Modal } from "../";
+import {
+  AppForm,
+  AppFormArea,
+  ErrorMessage,
+  SubmitButton,
+} from "../forms/formik";
 import { servicesImageSelection } from "../../utils/data";
+
+import { ServicesContext } from "../../context/ServicesProvider";
+import servicesApi from "../../api/services";
 
 const validationSchema = Yup.object().shape({
   image: Yup.string().required("Please select an image."),
@@ -18,49 +27,76 @@ const validationSchema = Yup.object().shape({
     .required("This field is required."),
 });
 
-export default function ServiceAdd({ onClose }) {
+export default function ServiceAdd({ onClose, ...otherProps }) {
+  const { servicesData, setServicesData } = useContext(ServicesContext);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+
   const handleSubmit = async (values) => {
-    console.log(values);
+    try {
+      setLoading(true);
+      const response = await servicesApi.AddService({ ...values });
+      setServicesData([...servicesData, response.data]);
+      setLoading(false);
+      setErrorMessage(null);
+      toast.success("Added Successfully.");
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage(error);
+      toast.error("An error occured.");
+    }
   };
 
   return (
-    <Form>
-      <Icon
-        className="close-icon"
-        icon={FiXCircle}
-        color="#F61767"
-        onClick={onClose}
-      />
-      <AppForm
-        initialValues={{ image: "", title: "", description: "" }}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        <ContentWrapper>
-          <Section>
-            <h1>Image</h1>
-            <ImageSelection name="image" data={servicesImageSelection} />
-          </Section>
-          <Section>
-            <h1>Title</h1>
-            <AppFormArea
-              name="title"
-              placeholder="Title"
-              className="textarea--title"
+    <Modal onClose={onClose} {...otherProps}>
+      <Form>
+        <Icon
+          className="close-icon"
+          icon={FiXCircle}
+          color="#F61767"
+          onClick={onClose}
+        />
+        <AppForm
+          initialValues={{ image: "", title: "", description: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <ContentWrapper>
+            <Section>
+              <h1>Image</h1>
+              <ImageSelection name="image" data={servicesImageSelection} />
+            </Section>
+            <Section>
+              <h1>Title</h1>
+              <AppFormArea
+                name="title"
+                placeholder="Title"
+                className="textarea--title"
+              />
+            </Section>
+            <Section>
+              <h1>Description</h1>
+              <AppFormArea
+                name="description"
+                placeholder="Description"
+                className="textarea--description"
+              />
+            </Section>
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try  again later."
+              }
             />
-          </Section>
-          <Section>
-            <h1>Description</h1>
-            <AppFormArea
-              name="description"
-              placeholder="Description"
-              className="textarea--description"
-            />
-          </Section>
-        </ContentWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </Form>
+          </ContentWrapper>
+          <SubmitButton className="save-btn">
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </Form>
+    </Modal>
   );
 }
 
@@ -97,11 +133,11 @@ const Form = styled.div`
     transition: all 300ms ease;
     font-size: 1.6rem;
     font-weight: bold;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;

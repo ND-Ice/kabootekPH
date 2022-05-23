@@ -1,81 +1,114 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { FiXCircle } from "react-icons/fi";
 
-import { Icon } from "../";
+import { Icon, Modal } from "../";
 import ColorPicker from "../ColorPicker";
-import { AppForm, SubmitButton } from "../forms/formik";
+import { AppForm, ErrorMessage, SubmitButton } from "../forms/formik";
 
-export default function PresetEdit({ preset, onClose }) {
+import { CustomThemeContext } from "../../context/CustomThemeProvider";
+import themeApi from "../../api/theme";
+
+export default function PresetEdit({ preset, onClose, ...otherProps }) {
   const [showDark, setShowDark] = useState(false);
   const [showLight, setShowLight] = useState(false);
   const [showAccent, setShowAccent] = useState(false);
   const [showActive, setShowActive] = useState(false);
 
-  const handleSubmit = (values) => {
-    alert(JSON.stringify(values));
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+  const { setCustomTheme } = useContext(CustomThemeContext);
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await themeApi.updateTheme(values, preset?.id);
+      setCustomTheme((prevState) =>
+        prevState.map((item) =>
+          item?.id === response?.data?.id
+            ? { ...item, ...response?.data }
+            : item
+        )
+      );
+      setLoading(false);
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage(error);
+    }
   };
 
   return (
-    <Wrapper>
-      <Icon
-        icon={FiXCircle}
-        size={40}
-        color="#F61767"
-        className="close-icon"
-        onClick={onClose}
-      />
-      <Title>Preset</Title>
-      <AppForm
-        initialValues={{
-          dark: preset.colors.dark,
-          light: preset.colors.light,
-          accent: preset.colors.accent,
-          active: preset.colors.active,
-        }}
-        onSubmit={handleSubmit}
-      >
-        <ContentWrapper>
-          <PickerWrapper>
-            Dark
-            <ColorPicker
-              name="dark"
-              isOpen={showDark}
-              onClose={() => setShowDark(false)}
-              onPick={() => setShowDark(true)}
+    <Modal onClose={onClose} {...otherProps}>
+      <Wrapper>
+        <Icon
+          icon={FiXCircle}
+          size={40}
+          color="#F61767"
+          className="close-icon"
+          onClick={onClose}
+        />
+        <Title>Preset</Title>
+        <AppForm
+          initialValues={{
+            dark_color: preset?.dark_color,
+            light_color: preset?.light_color,
+            accent_color: preset?.accent_color,
+            active_color: preset?.active_color,
+          }}
+          onSubmit={handleSubmit}
+        >
+          <ContentWrapper>
+            <PickerWrapper>
+              Dark
+              <ColorPicker
+                name="dark_color"
+                isOpen={showDark}
+                onClose={() => setShowDark(false)}
+                onPick={() => setShowDark(true)}
+              />
+            </PickerWrapper>
+            <PickerWrapper>
+              Light
+              <ColorPicker
+                name="light_color"
+                isOpen={showLight}
+                onClose={() => setShowLight(false)}
+                onPick={() => setShowLight(true)}
+              />
+            </PickerWrapper>
+            <PickerWrapper>
+              Accent
+              <ColorPicker
+                name="accent_color"
+                isOpen={showAccent}
+                onClose={() => setShowAccent(false)}
+                onPick={() => setShowAccent(true)}
+              />
+            </PickerWrapper>
+            <PickerWrapper>
+              Active
+              <ColorPicker
+                name="active_color"
+                isOpen={showActive}
+                onClose={() => setShowActive(false)}
+                onPick={() => setShowActive(true)}
+              />
+            </PickerWrapper>
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try again later."
+              }
             />
-          </PickerWrapper>
-          <PickerWrapper>
-            Light
-            <ColorPicker
-              name="light"
-              isOpen={showLight}
-              onClose={() => setShowLight(false)}
-              onPick={() => setShowLight(true)}
-            />
-          </PickerWrapper>
-          <PickerWrapper>
-            Accent
-            <ColorPicker
-              name="accent"
-              isOpen={showAccent}
-              onClose={() => setShowAccent(false)}
-              onPick={() => setShowAccent(true)}
-            />
-          </PickerWrapper>
-          <PickerWrapper>
-            Active
-            <ColorPicker
-              name="active"
-              isOpen={showActive}
-              onClose={() => setShowActive(false)}
-              onPick={() => setShowActive(true)}
-            />
-          </PickerWrapper>
-        </ContentWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </Wrapper>
+          </ContentWrapper>
+          <SubmitButton className="save-btn" disabled={loading}>
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </Wrapper>
+    </Modal>
   );
 }
 
@@ -103,11 +136,11 @@ const Wrapper = styled.div`
     font-weight: bold;
     padding: 2rem 4rem;
     transition: all 300ms ease;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;

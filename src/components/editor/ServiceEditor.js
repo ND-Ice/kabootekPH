@@ -27,6 +27,7 @@ export default function ServiceEditor({
 }
 
 const Wrapper = styled("div")`
+  min-width: 250px;
   max-width: 250px;
   text-align: center;
   border-radius: 3rem;
@@ -40,13 +41,13 @@ const Wrapper = styled("div")`
 const Title = styled("h3")`
   font-size: 1.6rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const Description = styled("p")`
   font-size: 1.6rem;
   line-height: 2.4rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const ServiceImage = styled.img`
@@ -55,7 +56,9 @@ const ServiceImage = styled.img`
   display: block;
   width: 100px;
   height: 100px;
-  object-fit: contain;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
 `;
 
 const IconWrapper = styled.div`

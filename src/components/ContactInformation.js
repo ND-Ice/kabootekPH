@@ -5,7 +5,13 @@ import { FiPlusCircle } from "react-icons/fi";
 
 import { Icon } from "./";
 
-export default function ContactInformation({ title, items, onAdd, onEdit }) {
+export default function ContactInformation({
+  title,
+  textProperty,
+  items,
+  onAdd,
+  onEdit,
+}) {
   return (
     <Component>
       <ComponentTitle>
@@ -14,7 +20,7 @@ export default function ContactInformation({ title, items, onAdd, onEdit }) {
 
       {items?.map((item, index) => (
         <ComponentDescription key={index}>
-          {item?.title}
+          {item[textProperty]}
           <Icon
             className="edit-icon"
             icon={FaPencilAlt}
@@ -29,7 +35,7 @@ export default function ContactInformation({ title, items, onAdd, onEdit }) {
 }
 
 const Component = styled.div`
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const ComponentTitle = styled.h3`

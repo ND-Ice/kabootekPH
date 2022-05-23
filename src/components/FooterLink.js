@@ -16,9 +16,9 @@ const CustomLink = styled(Link)`
   font-size: 2rem;
   transition: all 300ms ease;
   line-height: 40px;
-  color: ${({ theme }) => theme.light};
+  color: ${({ theme }) => theme.light_color};
 
   &:hover {
-    color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.accent_color};
   }
 `;

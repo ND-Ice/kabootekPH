@@ -14,7 +14,7 @@ const CustomLink = styled(Link)`
   display: block;
   text-decoration: none;
   font-size: 1.6rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
   cursor: pointer;
   margin: 2rem 0;
   transition: all 150ms ease;
@@ -24,10 +24,10 @@ const CustomLink = styled(Link)`
   }
 
   &:hover {
-    color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.accent_color};
   }
 
   &.active {
-    color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.accent_color};
   }
 `;

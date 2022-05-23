@@ -1,10 +1,42 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 
 // component import
 import { FooterLink, SocialLinks } from "..";
+import { communityLinksLocal } from "../../utils/data";
+
+import { SocialContext } from "../../context/SocialProvider";
+import { CommunityContext } from "../../context/CommunityProvier";
+import socialApi from "../../api/social";
+import communityApi from "../../api/community";
 
 export default function Footer() {
+  const { socialLinks, setSocialLinks } = useContext(SocialContext);
+  const { communityLinks, setCommunityLinks } = useContext(CommunityContext);
+
+  useEffect(() => {
+    getSocialLinks();
+    getCommunityLinks();
+  }, []);
+
+  const getSocialLinks = async () => {
+    try {
+      const response = await socialApi.getSocialLinks();
+      setSocialLinks(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getCommunityLinks = async () => {
+    try {
+      const response = await communityApi.getCommunityLinks();
+      setCommunityLinks(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container>
       {/*  upper section */}
@@ -28,7 +60,7 @@ export default function Footer() {
         </ExploreWrapper>
 
         {/* social link */}
-        <SocialLinks />
+        <SocialLinks links={socialLinks} />
       </UpperSection>
 
       {/* lower section */}
@@ -36,14 +68,23 @@ export default function Footer() {
         {/* legal section */}
         <LegalWrapper>
           <Header>Legal</Header>
-          <FooterLink>Privacy Policy Terms & Condition</FooterLink>
+          <FooterLink to="privacy">Privacy Policy Terms & Condition</FooterLink>
         </LegalWrapper>
 
         {/* community section */}
         <CommunityWrapper>
           <Header>Community</Header>
-          <FooterLink to="suppot">Support</FooterLink>
-          <FooterLink to="help">Help</FooterLink>
+          {communityLinks?.length !== 0
+            ? communityLinks?.map((link) => (
+                <FooterLink key={link?.id} to={link?.href}>
+                  {link?.title}
+                </FooterLink>
+              ))
+            : communityLinksLocal?.map((link, index) => (
+                <FooterLink key={index} to={link?.href}>
+                  {link?.title}
+                </FooterLink>
+              ))}
         </CommunityWrapper>
         <CommunityWrapper />
       </LowerSection>
@@ -53,9 +94,9 @@ export default function Footer() {
 
 const Container = styled("div")`
   margin-top: 10rem;
-  background: #4b4b4b;
+  background: ${({ theme }) => theme.dark_color};
   min-height: 100vh;
-  color: ${({ theme }) => theme.light};
+  color: ${({ theme }) => theme.light_color};
   padding: 1rem;
   display: grid;
 

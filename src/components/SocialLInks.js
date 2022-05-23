@@ -2,17 +2,30 @@ import React from "react";
 import styled from "styled-components";
 
 // components import
+import { socialLinksLocal } from "../utils/data";
 import { SocialLink } from "./";
 
-export default function SocialLInks() {
+export default function SocialLInks({ links }) {
   return (
     <Wrapper>
       <Header>Follow</Header>
-
-      <SocialLink title="Facebook" />
-      <SocialLink title="Instagram" />
-      <SocialLink title="Twitter" />
-      <SocialLink title="Youtube" />
+      {links?.length !== 0
+        ? links?.map((link) => (
+            <SocialLink
+              key={link?.id}
+              target="_blank"
+              title={link?.title}
+              href={link?.href}
+            />
+          ))
+        : socialLinksLocal?.map((link, index) => (
+            <SocialLink
+              key={index}
+              target="_blank"
+              title={link?.title}
+              href={link?.href}
+            />
+          ))}
     </Wrapper>
   );
 }

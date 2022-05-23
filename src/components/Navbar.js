@@ -26,6 +26,7 @@ export default function Navbar() {
             key={navItem.dest}
             to={navItem.dest}
             spy={true}
+            smooth={true}
             onClick={() => setIsToggle(false)}
           >
             {navItem.title}
@@ -48,8 +49,8 @@ const Nav = styled("nav")`
   padding: 1rem;
   flex-wrap: wrap;
   z-index: 10;
-  background: ${({ isScrolled, isToggle }) =>
-    isScrolled | isToggle ? "white" : "transparent"};
+  background: ${({ theme, isScrolled, isToggle }) =>
+    isScrolled | isToggle ? theme.light_color : "transparent"};
   transition: all 300ms ease;
 
   @media (min-width: 800px) {
@@ -95,5 +96,5 @@ const Brand = styled(Link)`
   font-size: 2.4rem;
   text-decoration: none;
   cursor: pointer;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;

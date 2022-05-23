@@ -1,24 +1,69 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { FiPlusCircle } from "react-icons/fi";
 
-import { Icon, Modal } from "../components";
+import { Icon } from "../components";
 import { ServiceEditor } from "../components/editor";
-import { services } from "../utils/data";
 import {
   DeleteConfirmation,
   ServiceAdd,
   ServiceEdit,
 } from "../components/modals";
 
+import { ServicesContext } from "../context/ServicesProvider";
+import { CustomThemeContext } from "../context/CustomThemeProvider";
+import servicesApi from "../api/services";
+import themeApi from "../api/theme";
+import toast from "react-hot-toast";
+
 export default function ServicesEditor() {
+  const { servicesData, setServicesData } = useContext(ServicesContext);
+  const { setCustomTheme } = useContext(CustomThemeContext);
   const [showDelete, setShowDelete] = useState(false);
   const [showServiceEdit, setShowServiceEdit] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const handleDelete = (id) => {
-    setShowDelete(false);
+  useEffect(() => {
+    getServicesData();
+    getThemes();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+      const response = await servicesApi.deleteService(id);
+      setServicesData(
+        servicesData?.filter((service) => service?.id !== response?.data?.id)
+      );
+      setLoading(false);
+      setShowDelete(false);
+      toast.success("Deleted successfully.");
+    } catch (error) {
+      setLoading(false);
+      setShowDelete(false);
+      toast.error(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again later."
+      );
+    }
+  };
+
+  const getThemes = async () => {
+    try {
+      const response = await themeApi.getThemes();
+      setCustomTheme(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getServicesData = async () => {
+    try {
+      const response = await servicesApi.getServicesData();
+      setServicesData(response.data);
+    } catch (error) {}
   };
 
   return (
@@ -29,12 +74,12 @@ export default function ServicesEditor() {
       </Header>
 
       <ServicesContainer>
-        {services.map((service, index) => (
+        {servicesData?.map((service, index) => (
           <ServiceEditor
             key={index}
-            title={service.title}
-            description={service.description}
-            img={service.image}
+            title={service?.title}
+            description={service?.description}
+            img={service?.image}
             onEdit={() => {
               setShowServiceEdit(true);
               setSelected(service);
@@ -46,25 +91,21 @@ export default function ServicesEditor() {
           />
         ))}
       </ServicesContainer>
-      {/* add modals */}
-      <Modal isOpen={showAdd} onClose={() => setShowAdd(false)}>
-        <ServiceAdd onClose={() => setShowAdd(false)} />
-      </Modal>
 
-      {/* edit modals */}
-      <Modal isOpen={showDelete}>
-        <DeleteConfirmation
-          selected={selected}
-          onDelete={handleDelete}
-          onCancel={() => setShowDelete(false)}
-        />
-      </Modal>
-      <Modal isOpen={showServiceEdit} onClose={() => setShowServiceEdit(false)}>
-        <ServiceEdit
-          service={selected}
-          onClose={() => setShowServiceEdit(false)}
-        />
-      </Modal>
+      {/* modals */}
+      <ServiceAdd isOpen={showAdd} onClose={() => setShowAdd(false)} />
+      <DeleteConfirmation
+        isOpen={showDelete}
+        selected={selected}
+        onDelete={handleDelete}
+        loading={loading}
+        onCancel={() => setShowDelete(false)}
+      />
+      <ServiceEdit
+        isOpen={showServiceEdit}
+        service={selected}
+        onClose={() => setShowServiceEdit(false)}
+      />
     </Page>
   );
 }
@@ -78,7 +119,7 @@ const Page = styled.div`
 const PageTitle = styled.h1`
   font-size: 2rem;
   font-weight: 400;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const Header = styled.header`
@@ -92,5 +133,4 @@ const ServicesContainer = styled.div`
   display: flex;
   gap: 5rem;
   flex-wrap: wrap;
-  justify-content: center;
 `;

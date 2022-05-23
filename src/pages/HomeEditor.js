@@ -1,62 +1,114 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
-import { FaPencilAlt } from "react-icons/fa";
+import { FaPencilAlt, FaPlusCircle } from "react-icons/fa";
 
-import hero_image from "../images/hero_image.png";
-import { Icon, Modal } from "../components";
+import { DescriptionEdit, Icon } from "../components";
 import {
   HomeEditDescription,
   HomeImageEdit,
   HomeTitleEdit,
 } from "../components/modals";
 
+import { HomeContext } from "../context/HomeProvider";
+import { CustomThemeContext } from "../context/CustomThemeProvider";
+import homeApi from "../api/home";
+import themeApi from "../api/theme";
+
+import imagePlaceholder from "../images/image-placeholder.png";
+import HomeDataAdd from "../components/modals/HomeDataAdd";
+
 export default function HomeEditor() {
+  const [showHomeAdd, setShowHomeAdd] = useState(false);
   const [showTitleEdit, setShowTitleEdit] = useState(false);
   const [showDescriptionEdit, setShowDescriptionEdit] = useState(false);
   const [showImageEdit, setShowImageEdit] = useState(false);
+  const { homeData, setHomeData } = useContext(HomeContext);
+  const { setCustomTheme } = useContext(CustomThemeContext);
+
+  useEffect(() => {
+    getHomeData();
+    getThemes();
+  }, []);
+
+  const getHomeData = async () => {
+    try {
+      const response = await homeApi.getHomeData();
+      setHomeData(response?.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getThemes = async () => {
+    try {
+      const response = await themeApi.getThemes();
+      setCustomTheme(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Page>
-      <PageHeader>Home</PageHeader>
+      <FlexContainer>
+        <PageHeader>Home</PageHeader>
+        {!homeData && (
+          <Icon
+            icon={FaPlusCircle}
+            size={40}
+            onClick={() => setShowHomeAdd(true)}
+          />
+        )}
+      </FlexContainer>
       <Grid1x2>
         <div>
-          <PageTitle>
-            eWallet Driven Company
-            <IconWrapper onClick={() => setShowTitleEdit(true)}>
-              <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
-            </IconWrapper>
-          </PageTitle>
-          <PageDescription>
-            eWallet is a money transfer service that allows you to send money to
-            anyone instantly, easily, and affordably.
-            <IconWrapper onClick={() => setShowDescriptionEdit(true)}>
-              <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
-            </IconWrapper>
-          </PageDescription>
+          {homeData?.title ? (
+            <>
+              <PageTitle>
+                {homeData?.title}
+                <IconWrapper onClick={() => setShowTitleEdit(true)}>
+                  <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
+                </IconWrapper>
+              </PageTitle>
+              <DescriptionEdit onEdit={() => setShowDescriptionEdit(true)}>
+                {homeData?.description}
+              </DescriptionEdit>
+            </>
+          ) : (
+            <>
+              <PageTitle> Heading</PageTitle>
+              <Description>Description</Description>
+            </>
+          )}
         </div>
-        <HeroImageWrapper>
-          <img src={hero_image} alt="hero-image" />
-          <IconWrapper onClick={() => setShowImageEdit(true)}>
-            <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
-          </IconWrapper>
-        </HeroImageWrapper>
+
+        {homeData?.image ? (
+          <div>
+            <HeroImage src={homeData?.image} alt="hero" />
+            <IconWrapper onClick={() => setShowImageEdit(true)}>
+              <Icon icon={FaPencilAlt} color="#4b4b4b" size={20} />
+            </IconWrapper>
+          </div>
+        ) : (
+          <ImagePlaceholder src={imagePlaceholder} />
+        )}
       </Grid1x2>
 
       {/* modals */}
-      <Modal isOpen={showTitleEdit} onClose={() => setShowTitleEdit(false)}>
-        <HomeTitleEdit onClose={() => setShowTitleEdit(false)} />
-      </Modal>
-
-      <Modal
+      <HomeDataAdd isOpen={showHomeAdd} onClose={() => setShowHomeAdd(false)} />
+      <HomeTitleEdit
+        isOpen={showTitleEdit}
+        onClose={() => setShowTitleEdit(false)}
+      />
+      <HomeEditDescription
         isOpen={showDescriptionEdit}
         onClose={() => setShowDescriptionEdit(false)}
-      >
-        <HomeEditDescription onClose={() => setShowDescriptionEdit(false)} />
-      </Modal>
-
-      <Modal isOpen={showImageEdit} onClose={() => setShowImageEdit(false)}>
-        <HomeImageEdit onClose={() => setShowImageEdit(false)} />
-      </Modal>
+      />
+      <HomeImageEdit
+        isOpen={showImageEdit}
+        open={setShowImageEdit}
+        onClose={() => setShowImageEdit(false)}
+      />
     </Page>
   );
 }
@@ -69,14 +121,22 @@ const Page = styled.div`
   position: relative;
 `;
 
+const FlexContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5rem;
+`;
+
 const PageHeader = styled.header`
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const Grid1x2 = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   place-items: center;
+  min-height: 400px;
 `;
 
 const PageTitle = styled.h1`
@@ -84,16 +144,7 @@ const PageTitle = styled.h1`
   font-size: 7rem;
   font-weight: 700;
   line-height: 1;
-  color: ${({ theme }) => theme.dark};
-`;
-
-const PageDescription = styled.p`
-  font-size: 2rem;
-  line-height: 3rem;
-  max-width: 40ch;
-  display: inline-block;
-  vertical-align: middle;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const IconWrapper = styled.span`
@@ -101,4 +152,22 @@ const IconWrapper = styled.span`
   display: inline-block;
 `;
 
-const HeroImageWrapper = styled.div``;
+const HeroImage = styled.img`
+  width: 500px;
+  height: 500px;
+  object-fit: contain;
+`;
+
+const Description = styled.p`
+  line-height: 3rem;
+  max-width: 40ch;
+  color: ${({ theme }) => theme.dark_color};
+`;
+
+const ImagePlaceholder = styled.img`
+  width: 350px;
+  height: 400px;
+  object-fit: contain;
+  border: 4px solid #a1a1a1;
+  border-radius: 1rem;
+`;

@@ -39,11 +39,12 @@ const Image = styled.img`
   border-radius: 2rem;
   position: relative;
   transition: all 300ms ease;
-  outline: 1px solid ${({ theme }) => theme.accent};
+  outline: 1px solid ${({ theme }) => theme.accent_color};
   border: 1rem solid
-    ${({ theme, selected }) => (selected ? theme.accent : theme.light)};
+    ${({ theme, selected }) =>
+      selected ? theme.accent_color : theme.light_color};
 
   &:hover {
-    border-color: ${({ theme }) => theme.accent};
+    border-color: ${({ theme }) => theme.accent_color};
   }
 `;

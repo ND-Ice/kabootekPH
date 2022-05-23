@@ -1,20 +1,29 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "../Button";
+import Modal from "../Modal";
 
-export default function DeleteConfirmation({ selected, onDelete, onCancel }) {
+export default function DeleteConfirmation({
+  selected,
+  onDelete,
+  onCancel,
+  loading,
+  ...otherProps
+}) {
   return (
-    <Wrapper>
-      <Button
-        className="btn delete-btn"
-        onClick={() => onDelete(selected.title)}
-      >
-        Delete
-      </Button>
-      <Button className="btn cancel-btn" onClick={onCancel}>
-        Cancel
-      </Button>
-    </Wrapper>
+    <Modal {...otherProps}>
+      <Wrapper>
+        <Button
+          className="btn delete-btn"
+          onClick={() => onDelete(selected?.id)}
+        >
+          {loading ? "Deleting..." : "Delete"}
+        </Button>
+        <Button className="btn cancel-btn" onClick={onCancel}>
+          Cancel
+        </Button>
+      </Wrapper>
+    </Modal>
   );
 }
 

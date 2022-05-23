@@ -113,3 +113,15 @@ export const heroImages = [
   hero_10,
   hero_11,
 ];
+
+export const socialLinksLocal = [
+  { title: "Facebook", href: "www.facebook.com/kabootekph" },
+  { title: "Instagram", href: "www.instagram.com/kabootekph" },
+  { title: "Twitter", href: "www.twitter.com/kabootekph" },
+  { title: "Youtube", href: "www.youtube.com/kabootekph" },
+];
+
+export const communityLinksLocal = [
+  { title: "Support", href: "/support" },
+  { title: "Help", href: "/help" },
+];

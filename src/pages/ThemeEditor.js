@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { FiPlusCircle } from "react-icons/fi";
 
-import { ColorPreset, Icon, Modal } from "../components";
+import { ColorPreset, Icon } from "../components";
 import {
   ApplyConfirmation,
   PresetEdit,
@@ -10,45 +10,93 @@ import {
   DeleteConfirmation,
 } from "../components/modals";
 
-const presets = [
-  {
-    isActive: true,
-    colors: {
-      light: "#ffffff",
-      dark: "#4b4b4b",
-      accent: "#00BFA6",
-      active: "#63C5B8",
-    },
-  },
-  {
-    isActive: false,
-    colors: {
-      light: "#ffffff",
-      dark: "#4b4b4b",
-      accent: "#00BFA6",
-      active: "#63C5B8",
-    },
-  },
-  {
-    isActive: false,
-    colors: {
-      light: "#ffffff",
-      dark: "#4b4b4b",
-      accent: "#00BFA6",
-      active: "#63C5B8",
-    },
-  },
-];
+import { CustomThemeContext } from "../context/CustomThemeProvider";
+import themeApi from "../api/theme";
+import toast from "react-hot-toast";
 
 export default function ThemeEditor() {
+  const { customTheme, setCustomTheme } = useContext(CustomThemeContext);
+  const [selectedPreset, setSelectedPreset] = useState({});
   const [showApply, setShowApply] = useState(false);
   const [showPresetEdit, setShowPresetEdit] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState({});
+  const [applyingTheme, setApplyingTheme] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = (id) => {
-    setShowDelete(false);
+  useEffect(() => {
+    getThemes();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      setDeleting(true);
+      const response = await themeApi.deleteTheme(id);
+      setCustomTheme((prevTheme) =>
+        prevTheme.filter((theme) => theme.id !== response?.data?.id)
+      );
+      setShowDelete(false);
+      setDeleting(false);
+      toast.success("Deleted Successfully.");
+    } catch (error) {
+      setShowDelete(false);
+      setDeleting(false);
+      toast.error(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again later."
+      );
+    }
+  };
+
+  const handlePresetApply = (selected) => {
+    setSelectedPreset(selected);
+    setShowApply(true);
+  };
+
+  const handlePresetEdit = (selected) => {
+    setSelectedPreset(selected);
+    setShowPresetEdit(true);
+  };
+
+  const handlePresetDelete = (selected) => {
+    setSelectedPreset(selected);
+    setShowDelete(true);
+  };
+
+  const getThemes = async () => {
+    try {
+      const response = await themeApi.getThemes();
+      setCustomTheme(response?.data);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again later."
+      );
+    }
+  };
+
+  const handleActivatePreset = async (id) => {
+    try {
+      setApplyingTheme(true);
+      const response = await themeApi.activateTheme(id);
+      setCustomTheme((prevState) =>
+        prevState?.map((item) => {
+          if (item?.is_activated) return { ...item, is_activated: false };
+          if (item?.id === response?.data?.id)
+            return { ...item, ...response?.data };
+          return item;
+        })
+      );
+      setApplyingTheme(false);
+      setShowApply(false);
+      toast.success("Applied Successfully.");
+    } catch (error) {
+      setApplyingTheme(false);
+      toast.error(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again later."
+      );
+    }
   };
 
   return (
@@ -57,57 +105,47 @@ export default function ThemeEditor() {
         Theme
         <Icon icon={FiPlusCircle} size={40} onClick={() => setShowAdd(true)} />
       </PageHeader>
+
       <PresetHeader>
         <PresetTitle>Dark</PresetTitle>
         <PresetTitle>Light</PresetTitle>
         <PresetTitle>Accent</PresetTitle>
-        <PresetTitle className="header--active">Active</PresetTitle>
+        <PresetTitle>Active</PresetTitle>
       </PresetHeader>
+
       <PresetsContainer>
-        {presets.map((preset, index) => (
+        {customTheme?.map((preset, index) => (
           <ColorPreset
             key={index}
             preset={preset}
-            onApply={() => {
-              setShowApply(true);
-              setSelectedPreset(preset);
-            }}
-            onEdit={() => {
-              setShowPresetEdit(true);
-              setSelectedPreset(preset);
-            }}
-            onDelete={() => {
-              setShowDelete(true);
-              setSelectedPreset(preset);
-            }}
+            onApply={() => handlePresetApply(preset)}
+            onEdit={() => handlePresetEdit(preset)}
+            onDelete={() => handlePresetDelete(preset)}
           />
         ))}
       </PresetsContainer>
 
       {/* modals */}
-      <Modal isOpen={showApply}>
-        <ApplyConfirmation
-          selected={selectedPreset}
-          onConfirm={() => setShowApply(false)}
-          onCancel={() => setShowApply(false)}
-        />
-      </Modal>
-      <Modal isOpen={showPresetEdit} onClose={() => setShowPresetEdit(false)}>
-        <PresetEdit
-          preset={selectedPreset}
-          onClose={() => setShowPresetEdit(false)}
-        />
-      </Modal>
-      <Modal isOpen={showAdd} onClose={() => setShowAdd(false)}>
-        <PresetAdd onClose={() => setShowAdd(false)} />
-      </Modal>
-      <Modal isOpen={showDelete}>
-        <DeleteConfirmation
-          selected={selectedPreset}
-          onDelete={handleDelete}
-          onCancel={() => setShowDelete(false)}
-        />
-      </Modal>
+      <PresetAdd isOpen={showAdd} onClose={() => setShowAdd(false)} />
+      <PresetEdit
+        isOpen={showPresetEdit}
+        preset={selectedPreset}
+        onClose={() => setShowPresetEdit(false)}
+      />
+      <ApplyConfirmation
+        isOpen={showApply}
+        loading={applyingTheme}
+        selected={selectedPreset}
+        onConfirm={handleActivatePreset}
+        onCancel={() => setShowApply(false)}
+      />
+      <DeleteConfirmation
+        loading={deleting}
+        isOpen={showDelete}
+        selected={selectedPreset}
+        onDelete={handleDelete}
+        onCancel={() => setShowDelete(false)}
+      />
     </Page>
   );
 }
@@ -116,7 +154,7 @@ const Page = styled.div`
   padding: 5rem;
   font-size: 2rem;
   overflow-y: auto;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
 const PageHeader = styled.div`
@@ -129,9 +167,9 @@ const PageHeader = styled.div`
 const PresetHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 13.5rem;
+  gap: 11.5rem;
   margin-bottom: 2rem;
-  margin-left: 14.5rem;
+  margin-left: 17rem;
   text-align: center;
 `;
 

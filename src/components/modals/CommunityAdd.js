@@ -1,42 +1,78 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import * as Yup from "yup";
 import { FiXCircle } from "react-icons/fi";
+import toast from "react-hot-toast";
 
-import { Icon } from "../";
-import { AppForm, AppFormInput, SubmitButton } from "../forms/formik";
+import { Icon, Modal } from "../";
+import {
+  AppForm,
+  AppFormInput,
+  ErrorMessage,
+  SubmitButton,
+} from "../forms/formik";
+
+import { CommunityContext } from "../../context/CommunityProvier";
+import communityApi from "../../api/community";
 
 const validationSchema = Yup.object().shape({
   title: Yup.string()
-    .min(5, "This should be atleast 5 characters long.")
+    .min(4, "This should be atleast 4 characters long.")
     .required("This field is required."),
   href: Yup.string().required("This field is required."),
 });
 
-export default function CommunityAdd({ onClose }) {
-  const handleSubmit = (values) => {
-    console.log(values);
+export default function CommunityAdd({ onClose, ...otherProps }) {
+  const { setCommunityLinks } = useContext(CommunityContext);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErroMessage] = useState();
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await communityApi.addCommunityLinks(values);
+      setCommunityLinks((prevState) => [...prevState, response?.data]);
+      setLoading(false);
+      setErroMessage(null);
+      toast.success("Added Successfully.");
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErroMessage(error);
+      toast.error("An error occured.");
+    }
   };
 
   return (
-    <FormWrapper>
-      <IconWrapper onClick={onClose}>
-        <Icon icon={FiXCircle} size={40} color="#F61767" />
-      </IconWrapper>
+    <Modal onClose={onClose} {...otherProps}>
+      <FormWrapper>
+        <IconWrapper onClick={onClose}>
+          <Icon icon={FiXCircle} size={40} color="#F61767" />
+        </IconWrapper>
 
-      <AppForm
-        initialValues={{ title: "", href: "" }}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        <FieldWrapper>
-          <FormTitle>Community</FormTitle>
-          <AppFormInput name="title" placeholder="Title" />
-          <AppFormInput name="href" placeholder="Link Address" />
-        </FieldWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </FormWrapper>
+        <AppForm
+          initialValues={{ title: "", href: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <FieldWrapper>
+            <FormTitle>Community</FormTitle>
+            <AppFormInput name="title" placeholder="Title" />
+            <AppFormInput name="href" placeholder="Link Address" />
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try again later."
+              }
+            />
+          </FieldWrapper>
+          <SubmitButton className="save-btn" disabled={loading}>
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </FormWrapper>
+    </Modal>
   );
 }
 
@@ -45,7 +81,7 @@ const FormWrapper = styled.form`
   border-radius: 3rem;
   background-color: #ffffff;
   overflow: hidden;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   & .save-btn {
     width: 100%;
@@ -57,11 +93,11 @@ const FormWrapper = styled.form`
     font-weight: bold;
     padding: 2rem 4rem;
     transition: all 300ms ease;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;

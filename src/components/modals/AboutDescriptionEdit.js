@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import * as Yup from "yup";
 import { FiXCircle } from "react-icons/fi";
+import toast from "react-hot-toast";
 
-import { Icon } from "../";
-import { AppForm, AppFormArea, SubmitButton } from "../forms/formik";
+import { Icon, Modal } from "../";
+import {
+  AppForm,
+  AppFormArea,
+  ErrorMessage,
+  SubmitButton,
+} from "../forms/formik";
+import { AboutContext } from "../../context/AboutProvider";
+import aboutApi from "../../api/about";
 
 const validationSchema = Yup.object().shape({
   description: Yup.string()
@@ -13,30 +21,55 @@ const validationSchema = Yup.object().shape({
     .required("This field is required."),
 });
 
-export default function AboutDescriptionEdit({ onClose }) {
-  const description =
-    "KabootekPH INC, a tech company that was established on year 2019. Kabootek is one of the fastest growing company that specializes in mobile and web applications.";
+export default function AboutDescriptionEdit({ onClose, ...otherProps }) {
+  const { aboutData, setAboutData } = useContext(AboutContext);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
-  const handleSubmit = (values) => {
-    console.log(values);
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await aboutApi.updateAbout(values, aboutData?.id);
+      setAboutData({ ...aboutData, ...response.data });
+      setLoading(false);
+      setErrorMessage(null);
+      toast.success("Updated successfully.");
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage(error);
+      toast.error("An error occured");
+    }
   };
+
   return (
-    <FormWrapper>
-      <IconWrapper onClick={onClose}>
-        <Icon icon={FiXCircle} size={40} color="#F61767" />
-      </IconWrapper>
-      <AppForm
-        initialValues={{ description }}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        <FieldWrapper>
-          <FormTitle>Description</FormTitle>
-          <AppFormArea name="description" placeholder="Description..." />
-        </FieldWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </FormWrapper>
+    <Modal onClose={onClose} {...otherProps}>
+      <FormWrapper>
+        <IconWrapper onClick={onClose}>
+          <Icon icon={FiXCircle} size={40} color="#F61767" />
+        </IconWrapper>
+        <AppForm
+          initialValues={{ description: aboutData?.description }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <FieldWrapper>
+            <FormTitle>Description</FormTitle>
+            <AppFormArea name="description" placeholder="Description..." />
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try again later."
+              }
+            />
+          </FieldWrapper>
+          <SubmitButton className="save-btn">
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </FormWrapper>
+    </Modal>
   );
 }
 
@@ -57,11 +90,11 @@ const FormWrapper = styled.div`
     font-weight: bold;
     padding: 2rem 4rem;
     transition: all 300ms ease;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;

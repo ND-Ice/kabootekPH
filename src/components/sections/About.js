@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
+
+import { AboutContext } from "../../context/AboutProvider";
+import aboutApi from "../../api/about";
 
 // image import
 import about_hero from "../../images/about-hero.png";
 
 export default function About() {
+  const { aboutData, setAboutData } = useContext(AboutContext);
+
+  useEffect(() => {
+    getAboutData();
+  }, []);
+
+  const getAboutData = async () => {
+    try {
+      const response = await aboutApi.getAboutData();
+      setAboutData(response.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container id="about">
       <Curve
@@ -15,25 +33,23 @@ export default function About() {
       >
         <path
           d="M513.062 155.139C355.2 55.592 0 -0.000134281 0 -0.000134281L-5.82236e-05 666L1536 666L1536 533.383C1536 533.383 966.402 621.27 737.726 379.228C657.809 294.64 611.896 217.463 513.062 155.139Z"
-          fill="#00BFA6"
           fill-opacity="0.05"
         />
       </Curve>
       <PageHeader data-aos="fade-down" data-aos-duration="1000">
-        About{" "}
+        About
       </PageHeader>
 
       <Grid1x2>
         <HeroImage
-          src={about_hero}
+          src={aboutData?.image || about_hero}
           alt=""
           data-aos="fade-right"
           data-aos-duration="1000"
         />
         <PageDescription data-aos="fade-left" data-aos-duration="1000">
-          KabootekPH inc, a tech company that was established on year 2019.
-          Kabootek is one of the fastest growing company that specializes in
-          mobile and web applications.{" "}
+          {aboutData?.description ||
+            "KabootekPH INC, a tech company that was established on year 2019. Kabootek is one of the fastest growing company that specializes in mobile and web applications."}
         </PageDescription>
       </Grid1x2>
     </Container>
@@ -76,14 +92,14 @@ const HeroImage = styled("img")`
 const PageHeader = styled("h2")`
   font-size: 3.2rem;
   margin-bottom: 10rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 `;
 
-const PageDescription = styled("div")`
+const PageDescription = styled("p")`
   font-size: 2.4rem;
   max-width: 33ch;
   margin-bottom: 10rem;
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
 
   @media (min-width: 720px) {
     text-align: left;
@@ -96,4 +112,5 @@ const Curve = styled("svg")`
   position: absolute;
   bottom: 0;
   left: 0;
+  fill: ${({ theme }) => theme.accent_color};
 `;

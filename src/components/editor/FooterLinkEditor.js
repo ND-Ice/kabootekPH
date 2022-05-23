@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { FaPencilAlt } from "react-icons/fa";
-import { FiX } from "react-icons/fi";
+import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 
 import { Icon } from "../";
 
@@ -11,7 +10,7 @@ export default function FooterLinkEditor({ title, onEdit, onDelete }) {
       {title}
       <div className="action-wrapper">
         <Icon icon={FaPencilAlt} color="#ffffff" onClick={onEdit} size={20} />
-        <Icon icon={FiX} color="#ffffff" onClick={onDelete} size={20} />
+        <Icon icon={FaTrashAlt} color="#ffffff" onClick={onDelete} size={20} />
       </div>
     </Component>
   );

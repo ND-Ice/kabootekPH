@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { ContactInformation, Modal } from "../components";
+import { ContactInformation } from "../components";
 import {
   AddressEdit,
   PhoneEdit,
@@ -11,17 +11,14 @@ import {
   AddressAdd,
 } from "../components/modals";
 
-const emails = [
-  { title: "delacruzjoshua691@gmail.com" },
-  { title: "info@kabootekph.com" },
-];
-const phones = [{ title: "PH (+63) 9662048118" }];
-const addresses = [
-  {
-    title:
-      "Unit 25-D, 2nd Floor, Zeta II Building, 191 Salcedo Street, Legaspi Village, San Lorenzo, 1223 City of Makati",
-  },
-];
+import { EmailContext } from "../context/EmailProvider";
+import { PhoneContext } from "../context/PhoneProvider";
+import { AddressContext } from "../context/AddressProvider";
+import { CustomThemeContext } from "../context/CustomThemeProvider";
+import emailApi from "../api/email";
+import phoneApi from "../api/phone";
+import addressApi from "../api/address";
+import themeApi from "../api/theme";
 
 export default function ContactEditor() {
   const [showEmailEdit, setShowEmailEdit] = useState(false);
@@ -34,13 +31,62 @@ export default function ContactEditor() {
   const [showPhoneAdd, setShowPhoneAdd] = useState(false);
   const [showAddressAdd, setShowAddressAdd] = useState(false);
 
+  const { emailData, setEmailData } = useContext(EmailContext);
+  const { phoneData, setPhoneData } = useContext(PhoneContext);
+  const { addressData, setAddressData } = useContext(AddressContext);
+  const { setCustomTheme } = useContext(CustomThemeContext);
+
+  useEffect(() => {
+    getEmailData();
+    getPhoneData();
+    getAddressData();
+    getThemes();
+  }, []);
+
+  const getEmailData = async () => {
+    try {
+      const response = await emailApi.getEmailData();
+      setEmailData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getPhoneData = async () => {
+    try {
+      const response = await phoneApi.getPhoneData();
+      setPhoneData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAddressData = async () => {
+    try {
+      const response = await addressApi.getAddressData();
+      setAddressData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getThemes = async () => {
+    try {
+      const response = await themeApi.getThemes();
+      setCustomTheme(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Page>
       <PageHeader>Contact</PageHeader>
       <PageContent>
         <ContactInformation
           title="email"
-          items={emails}
+          items={emailData}
+          textProperty="email"
           onAdd={() => setShowEmailAdd(true)}
           onEdit={(email) => {
             setShowEmailEdit(true);
@@ -49,7 +95,8 @@ export default function ContactEditor() {
         />
         <ContactInformation
           title="phone"
-          items={phones}
+          items={phoneData}
+          textProperty="phone"
           onAdd={() => setShowPhoneAdd(true)}
           onEdit={(phone) => {
             setShowPhoneEdit(true);
@@ -58,7 +105,8 @@ export default function ContactEditor() {
         />
         <ContactInformation
           title="address"
-          items={addresses}
+          items={addressData}
+          textProperty="address"
           onAdd={() => setShowAddressAdd(true)}
           onEdit={(address) => {
             setShowAddressEdit(true);
@@ -66,36 +114,37 @@ export default function ContactEditor() {
           }}
         />
       </PageContent>
+
       {/* add modals */}
-      <Modal isOpen={showEmailAdd} onClose={() => setShowEmailAdd(false)}>
-        <ContactEmailAdd onClose={() => setShowEmailAdd(false)} />
-      </Modal>
-      <Modal isOpen={showPhoneAdd} onClose={() => setShowPhoneAdd(false)}>
-        <ContactPhoneAdd onClose={() => setShowPhoneAdd(false)} />
-      </Modal>
-      <Modal isOpen={showAddressAdd} onClose={() => setShowAddressAdd(false)}>
-        <AddressAdd onClose={() => setShowAddressAdd(false)} />
-      </Modal>
+      <ContactEmailAdd
+        isOpen={showEmailAdd}
+        onClose={() => setShowEmailAdd(false)}
+      />
+      <ContactPhoneAdd
+        isOpen={showPhoneAdd}
+        onClose={() => setShowPhoneAdd(false)}
+      />
+      <AddressAdd
+        isOpen={showAddressAdd}
+        onClose={() => setShowAddressAdd(false)}
+      />
 
       {/* edit modals */}
-      <Modal isOpen={showEmailEdit} onClose={() => setShowEmailEdit(false)}>
-        <EmailEdit
-          email={selectedEmail}
-          onClose={() => setShowEmailEdit(false)}
-        />
-      </Modal>
-      <Modal isOpen={showPhoneEdit} onClose={() => setShowPhoneEdit(false)}>
-        <PhoneEdit
-          phone={selectedPhone}
-          onClose={() => setShowPhoneEdit(false)}
-        />
-      </Modal>
-      <Modal isOpen={showAddressEdit} onClose={() => setShowAddressEdit(false)}>
-        <AddressEdit
-          address={selectedAddress}
-          onClose={() => setShowAddressEdit(false)}
-        />
-      </Modal>
+      <EmailEdit
+        isOpen={showEmailEdit}
+        selected={selectedEmail}
+        onClose={() => setShowEmailEdit(false)}
+      />
+      <PhoneEdit
+        isOpen={showPhoneEdit}
+        selected={selectedPhone}
+        onClose={() => setShowPhoneEdit(false)}
+      />
+      <AddressEdit
+        isOpen={showAddressEdit}
+        selected={selectedAddress}
+        onClose={() => setShowAddressEdit(false)}
+      />
     </Page>
   );
 }
@@ -107,7 +156,7 @@ const Page = styled.div`
 `;
 
 const PageHeader = styled.header`
-  color: ${({ theme }) => theme.dark};
+  color: ${({ theme }) => theme.dark_color};
   margin-bottom: 5rem;
 `;
 

@@ -14,8 +14,8 @@ const CustomLink = styled(Link)`
   display: inline-block;
   text-decoration: none;
   font-size: 1.6rem;
-  background: ${({ theme }) => theme.accent};
-  color: ${({ theme }) => theme.light};
+  background: ${({ theme }) => theme.accent_color};
+  color: ${({ theme }) => theme.light_color};
   padding: 1.5rem 4rem;
   font-weight: 700;
   border-radius: 1.5rem;
@@ -24,8 +24,8 @@ const CustomLink = styled(Link)`
   transition: all 300ms ease;
 
   &:hover {
-    background: white;
-    border-color: ${({ theme }) => theme.accent};
-    color: ${({ theme }) => theme.accent};
+    background: none;
+    border-color: ${({ theme }) => theme.accent_color};
+    color: ${({ theme }) => theme.accent_color};
   }
 `;

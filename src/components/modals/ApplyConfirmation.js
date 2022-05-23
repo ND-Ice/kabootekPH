@@ -1,20 +1,29 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "../Button";
+import Modal from "../Modal";
 
-export default function ApplyConfirmation({ selected, onConfirm, onCancel }) {
+export default function ApplyConfirmation({
+  selected,
+  onConfirm,
+  onCancel,
+  loading,
+  ...otherProps
+}) {
   return (
-    <Wrapper>
-      <Button
-        className="btn confirm-btn"
-        onClick={() => onConfirm(selected.title)}
-      >
-        Confirm
-      </Button>
-      <Button className="btn cancel-btn" onClick={onCancel}>
-        Cancel
-      </Button>
-    </Wrapper>
+    <Modal {...otherProps}>
+      <Wrapper>
+        <Button
+          className="btn confirm-btn"
+          onClick={() => onConfirm(selected?.id)}
+        >
+          {loading ? "Applying..." : "Confirm"}
+        </Button>
+        <Button className="btn cancel-btn" onClick={onCancel}>
+          Cancel
+        </Button>
+      </Wrapper>
+    </Modal>
   );
 }
 

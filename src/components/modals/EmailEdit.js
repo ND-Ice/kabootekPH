@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import * as Yup from "yup";
 import { FiXCircle } from "react-icons/fi";
 
-import { Icon } from "..";
-import { AppForm, AppFormInput, SubmitButton } from "../forms/formik";
+import { Icon, Modal } from "..";
+import {
+  AppForm,
+  AppFormInput,
+  ErrorMessage,
+  SubmitButton,
+} from "../forms/formik";
+
+import emailApi from "../../api/email";
+import { EmailContext } from "../../context/EmailProvider";
+import toast from "react-hot-toast";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -12,28 +21,59 @@ const validationSchema = Yup.object().shape({
     .required("This field is required."),
 });
 
-export default function EmailEdit({ email, onClose }) {
-  const handleSubmit = (values) => {
-    console.log(values);
+export default function EmailEdit({ selected, onClose, ...otherProps }) {
+  const { setEmailData } = useContext(EmailContext);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await emailApi.updateEmail(values, selected?.id);
+      setEmailData((prevState) =>
+        prevState.map((data) =>
+          data?.id === selected?.id ? { ...data, ...response.data } : data
+        )
+      );
+      setErrorMessage(null);
+      toast.success("Updated Successfully.");
+      setLoading(false);
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage(error);
+      toast.error("An error occured.");
+    }
   };
   return (
-    <FormWrapper>
-      <IconWrapper onClick={onClose}>
-        <Icon icon={FiXCircle} size={40} color="#F61767" />
-      </IconWrapper>
+    <Modal onClose={onClose} {...otherProps}>
+      <FormWrapper>
+        <IconWrapper onClick={onClose}>
+          <Icon icon={FiXCircle} size={40} color="#F61767" />
+        </IconWrapper>
 
-      <AppForm
-        initialValues={{ email: email?.title }}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        <FieldWrapper>
-          <FormTitle>Email</FormTitle>
-          <AppFormInput name="email" placeholder="Email Address" />
-        </FieldWrapper>
-        <SubmitButton className="save-btn">Save</SubmitButton>
-      </AppForm>
-    </FormWrapper>
+        <AppForm
+          initialValues={{ email: selected?.email }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          <FieldWrapper>
+            <FormTitle>Email</FormTitle>
+            <AppFormInput name="email" placeholder="Email Address" />
+            <ErrorMessage
+              visible={errorMessage}
+              errors={
+                errorMessage?.response?.data?.message ||
+                "Something went wrong. Please try again later."
+              }
+            />
+          </FieldWrapper>
+          <SubmitButton className="save-btn">
+            {loading ? "Saving..." : "Save"}
+          </SubmitButton>
+        </AppForm>
+      </FormWrapper>
+    </Modal>
   );
 }
 
@@ -54,11 +94,11 @@ const FormWrapper = styled.div`
     font-weight: bold;
     padding: 2rem 4rem;
     transition: all 300ms ease;
-    color: ${({ theme }) => theme.light};
-    background-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.light_color};
+    background-color: ${({ theme }) => theme.accent_color};
 
     &:hover {
-      background-color: ${({ theme }) => theme.active};
+      background-color: ${({ theme }) => theme.active_color};
     }
   }
 `;
